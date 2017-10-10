@@ -17,6 +17,8 @@ cp docker-compose.sample.yml docker-compose.yml
 
 # Start a specific service instead of all:
 cp config/influxdb/influxdb.sample.conf config/influxdb/influxdb.conf
+cp config/influxdb/init.iql config/influxdb/init/10-init.iql # Init users
+
 emacs -nw config/influxdb/influxdb.conf
 docker-compose up -d influxdb
 

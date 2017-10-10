@@ -4,5 +4,8 @@ data/*
 *.conf
 !*.sample.conf
 
+/config/influxdb/init/*
+!/config/influxdb/init/.keep
+
 docker-compose*
 !docker-compose.sample.yml

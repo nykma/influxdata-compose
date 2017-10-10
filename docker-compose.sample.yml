@@ -13,6 +13,7 @@ services:
     volumes:
       - './config/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro'
       - './data/influxdb:/var/lib/influxdb'
+      - './config/influxdb/init:/docker-entrypoint-initdb.d:ro'
     command: '-config /etc/influxdb/influxdb.conf'
 
   # Processing, monitoring, and alerting on time series data
