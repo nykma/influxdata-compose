@@ -1,0 +1,67 @@
+version: '2'
+services:
+  # Scalable datastore for metrics, events, and real-time analytics
+  influxdb:
+    image: influxdb:alpine
+    restart: always
+    ports:
+      - '8086:8086' # HTTP API port
+      # - '2003:2003' # Graphite support if enabled
+      # - '25826:25826' # Collectd support if enabled
+      # - '4242:4242' # opentsdb support if enabled
+      # - '8089:8089/udp' # UDP support if enabled
+    volumes:
+      - './config/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro'
+      - './data/influxdb:/var/lib/influxdb'
+    command: '-config /etc/influxdb/influxdb.conf'
+
+  # Processing, monitoring, and alerting on time series data
+  kapacitor:
+    image: kapacitor:alpine
+    hostname: kapacitor
+    restart: always
+    ports:
+      - '9092:9092' # HTTP API endpoint
+    volumes:
+      - './config/kapacitor/kapacitor.conf:/etc/kapacitor/kapacitor.conf:ro'
+      - './data/kapacitor:/var/lib/kapacitor'
+    links:
+      - influxdb
+
+  #  The plugin-driven server agent for collecting & reporting metrics.
+  telegraf:
+    image: telegraf:alpine
+    restart: always
+    hostname: telegraf
+    # ports:
+      # - '8125:8125' # For StatsD plugin
+      # - '8092:8092/udp' # Image opened this. Don't know what's for.
+      # - '8094:8094' # putouts.socket_writer
+    volumes:
+      - './config/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro'
+      # -=- Host-monitoring-in-container config start -=-
+      # See also: https://www.jacobtomlinson.co.uk/monitoring/2016/06/23/running-telegraf-inside-a-container/
+      - '/var/run/docker.sock:/var/run/docker.sock:ro'
+      - '/sys:/rootfs/sys:ro'
+      - '/proc:/rootfs/proc:ro'
+      - '/etc:/rootfs/etc:ro'
+    environment:
+      - 'HOST_SYS=/rootfs/sys'
+      - 'HOST_PROC=/rootfs/proc'
+      - 'HOST_ETC=/rootfs/etc'
+      # -=- Host-monitoring-in-container config end -=-
+    # links:
+    #   - influxdb
+
+  # A visualization tool for time series data in InfluxDB.
+  chronograf:
+    image: chronograf:alpine
+    hostname: chronograf
+    restart: always
+    ports:
+      - '8888:8888' # web
+    volumes:
+      - './data/chronograf:/var/lib/chronograf'
+    links:
+      - influxdb
+      - kapacitor
