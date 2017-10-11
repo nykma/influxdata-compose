@@ -12,15 +12,15 @@ in one magical `docker-compose.yml`! Wow, such docker, very container.
 
 ## Usage
 
-```bash
-git clone https://github.com/nykma/influxdata-compose.git influx && cd influx
-cp docker-compose.sample.yml docker-compose.yml
+``` bash
+git clone https://github.com/nykma/influxdata-compose.git influx
+cd influx
+bash ./init.sh
 
-# Start a specific service instead of all:
-cp config/influxdb/influxdb.sample.conf config/influxdb/influxdb.conf
-cp config/influxdb/init.iql config/influxdb/init/10-init.iql # Init users
+# Edit config(s)
+emacs -nw config/influxdb/influxdb.conf config/influxdb/init/10-create-user.iql
 
-emacs -nw config/influxdb/influxdb.conf
+# Start a specific service if you want to:
 docker-compose up -d influxdb
 
 # Have a try!
